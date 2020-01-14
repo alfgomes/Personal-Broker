@@ -1,0 +1,10 @@
+MQTT, MOSCA WITH NODE:
+https://medium.com/@alifabdullah/setting-up-private-mqtt-broker-using-mosca-in-node-js-c61a3c74f952
+
+MQTT Garage Door Opener Example Application:
+https://blog.risingstack.com/getting-started-with-nodejs-and-mqtt/
+GIT: https://github.com/Losant/mqtt-garage-opener-example
+
+MQTT-SERVER:
+https://www.npmjs.com/package/mqtt-server
+GIT: https://github.com/mqttjs/create-stream-server
