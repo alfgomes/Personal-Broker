@@ -21,6 +21,8 @@
   },
   "homepage": "https://github.com/alfgomes/Personal-Broker/blob/master/README.md",
   "dependencies": {
+    "events": "^3.1.0",
+    "express": "^4.17.1",
     "mosca": "^2.8.3",
     "mqtt": "^3.0.0"
   }

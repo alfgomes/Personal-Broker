@@ -1,13 +1,23 @@
 //MQTT BROKER...
-var mosca = require('mosca')
-var settings = { port:1234 }
+var mosca = require('mosca');
+var settings = { port:1883 };
 
-var broker = new mosca.Server(settings, () => console.log("Mosca ready!"))
+var broker = new mosca.Server(settings, () => console.log("Mosca is starting..."));
 
-broker.on('ready', function() {
-	console.log("Broker is ready!")
-})
+broker.on('ready', setup);
 
-broker.on('published', (packet) => {
-	console.log(packet.payload.toString())
-})
+function setup() {
+	console.log('Mosca (Broker) server is up and running');
+};
+
+broker.on('clientConnected', function(client) {
+    console.log(`Client Connected: ${client.id}`);
+});
+
+broker.on('clientDisconnected', function(client) {
+    console.log(`Client Disconnected: ${client.id}`);
+});
+
+broker.on('published', function(packet, client) {
+	console.log(`Message Published:\n${packet.payload}`);
+});
