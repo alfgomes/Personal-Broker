@@ -1,41 +1,24 @@
-Date.prototype.yyyymmdd_hhmmss = function() {
-    var mes = this.getMonth() + 1;
-    var dia = this.getDate();
-    var hh = this.getHours();
-    var mm = this.getMinutes();
-    var ss = this.getSeconds();
-  
-    return [
-            this.getFullYear(),
-            '-',
-            (mes > 9 ? '' : '0') + mes,
-            '-',
-            (dia > 9 ? '' : '0') + dia,
-            '_',
-            (hh > 9 ? '' : '0') + hh,
-            ':',
-            (mm > 9 ? '' : '0') + mm,
-            ':',
-            (ss > 9 ? '' : '0') + ss
-           ].join('');
-};
-
-//MQTT PUBLISHER...
+/*############################################################################################*/
+/*## MQTT PUBLISHER                                                                         ##*/
+/*## CLIENT CONFIGURATIONS                                                                  ##*/
+/*############################################################################################*/
 var mqtt = require('mqtt'), url = require('url');
+var currentDate = require('./CurrentDate');
 var mqtt_url = url.parse(process.env.CLOUDAMQP_MQTT_URL || 'mqtt://localhost:1883');
 var auth = (mqtt_url.auth || ':').split(':');
 var url = "mqtt://" + mqtt_url.host;
 
-var options = {
+var connectOptions = {
     port: mqtt_url.port,
     clientId: 'mqttjs_' + Math.random().toString(16).substr(2, 8),
     username: auth[0],
     password: auth[1],
     keepalive: 60,
     //reconnectPeriod: 2000,
-    protocolId: 'MQIsdp',
-    protocolVersion: 3,
-    clean: true,
+    protocolId: 'MQTT',
+    protocolVersion: 4,
+    clean: false,
+    connectTimeout: 30000,
     encoding: 'utf8'
 };
 
@@ -45,7 +28,7 @@ var messageOptions = {
 };
   
 // Create a client connection
-var client = mqtt.connect(url, options);
+var client = mqtt.connect(url, connectOptions);
 
 
 
@@ -61,15 +44,17 @@ var message = {
 };
 
 client.on('connect', () => {
-    client.subscribe('error', function() {
-        // client.on('message', function(topic, message, packet) {
-        //     console.log(`Received '${message}' on '${topic}'`);
-        // });
+    client.subscribe('error', function(err) {
+        if (!err) {
+          client.publish('presence', 'Hello mqtt')
+        }
     });
+    
+    client.subscribe('client_will');
 
     setInterval(() => {
         message.subscriberID = new Date().getSeconds();
-        message.date = new Date().yyyymmdd_hhmmss();
+        message.date = currentDate.yyyymmdd_hhmmss();
 
         client.publish(topic, JSON.stringify(message), messageOptions);
         console.log('Message Sent:', message);
@@ -84,4 +69,8 @@ client.on('connect', () => {
 
 client.on('message', function(topic, message, packet) {
     console.log(`Received '${message}' on '${topic}'`);
+});
+
+client.on('client_will', function (topic, message, packet) {
+    console.log(`Subscriber will '${message}' on '${topic}'`);
 });
